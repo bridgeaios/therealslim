@@ -1,32 +1,16 @@
 import express from 'express';
 import { v4 as uuid } from 'uuid';
 import crypto from 'crypto';
+import rateLimit from 'express-rate-limit';
 import fs from './fs.js';
 
-// Simple in-memory rate limiter: max requests per window per IP
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX = 60;
-const rateLimitMap = new Map();
-
-function rateLimiter(req, res, next) {
-  const ip = req.ip || req.connection.remoteAddress;
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip) || { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
-
-  if (now > entry.resetAt) {
-    entry.count = 0;
-    entry.resetAt = now + RATE_LIMIT_WINDOW_MS;
-  }
-
-  entry.count += 1;
-  rateLimitMap.set(ip, entry);
-
-  if (entry.count > RATE_LIMIT_MAX) {
-    return res.status(429).json({ error: "Too many requests" });
-  }
-
-  next();
-}
+const fsReadLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests" }
+});
 
 // Collect all VFS paths into a flat Set for path validation
 function buildAllowedPaths(vfs) {
@@ -60,7 +44,7 @@ export async function initAPI({ vfs, secrets }) {
   });
 
   // FILE READ
-  app.post('/fs/read', rateLimiter, async (req, res) => {
+  app.post('/fs/read', fsReadLimiter, async (req, res) => {
     const { path } = req.body;
     if (!path || !allowedPaths.has(path)) {
       return res.status(403).json({ error: "Path not allowed" });
