@@ -61,7 +61,7 @@ export async function initAPI({ vfs, secrets }) {
   // CRYPTO PIPE (ENIGMA STYLE)
   app.post('/crypto', (req, res) => {
     if (!secrets.CRYPTO_KEY) {
-      return res.status(500).json({ error: "Crypto key unavailable" });
+      return res.status(500).json({ error: "CRYPTO_KEY not configured in secrets" });
     }
     const { payload } = req.body;
     const encrypted = encrypt(payload, secrets.CRYPTO_KEY);

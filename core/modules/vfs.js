@@ -51,9 +51,9 @@ async function deduplicate(index) {
 
   for (const drive in index) {
     index[drive] = index[drive].filter(file => {
-      const hash = file.split('/').pop();
-      if (seen.has(hash)) return false;
-      seen.add(hash);
+    const basename = file.split('/').pop();
+      if (seen.has(basename)) return false;
+      seen.add(basename);
       return true;
     });
   }
