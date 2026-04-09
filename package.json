@@ -1,0 +1,17 @@
+{
+  "name": "systema-os",
+  "version": "1.0.0",
+  "main": "core/kernel.js",
+  "type": "module",
+  "scripts": {
+    "start": "node core/kernel.js"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.5.0",
+    "fs-extra": "^11.2.0",
+    "uuid": "^9.0.1",
+    "ws": "^8.16.0"
+  }
+}
